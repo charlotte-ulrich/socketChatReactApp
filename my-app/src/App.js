@@ -12,7 +12,6 @@ class App extends Component {
       wordCount: {},
     };
 
-    this.scrollToBottom = this.scrollToBottom.bind(this);
     this.extractUsername = this.extractUsername.bind(this);
     this.countWords = this.countWords.bind(this);
   }
@@ -22,14 +21,7 @@ class App extends Component {
     this.setState({ username: username });
   }
 
-  scrollToBottom() {
-    const scrollHeight = this.messageList.scrollHeight;
-    const height = this.messageList.clientHeight;
-    const maxScrollTop = scrollHeight - height;
-    this.messageList.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
-  }
-
-  countWords(message, username) {
+  countWords(message) {
     let name = message.data.substring(0, message.data.indexOf(':'));
     let array = message.data
       .substring(message.data.indexOf(': ') + 2, message.data.length - 1)
@@ -60,22 +52,33 @@ class App extends Component {
       console.log(message);
       this.setState({ messages: [...this.state.messages, message.data] });
       this.extractUsername(message.data);
-      this.countWords(message, this.state.username);
+      this.countWords(message);
     };
   }
 
   render() {
-    const wordCount = this.state.wordCount;
-    let keys;
-    let values;
-    if (wordCount) {
-      keys = Object.keys(this.state.wordCount);
-      values = Object.values(this.state.wordCount);
-    }
+    const { wordCount } = this.state;
+    const sorted = Object.fromEntries(
+      Object.entries(wordCount).sort(([, a], [, b]) => b - a)
+    );
+
     return (
       <div>
-        <h1>Practical Intro To WebSockets.</h1>
-        <div>{/* add count here */}</div>
+        <h1>Chat Counter</h1>
+        <h2>Word Count</h2>
+        <div>
+          {wordCount ? (
+            Object.keys(sorted).map((key, i) => (
+              <p key={i}>
+                <span>{key} </span>
+                <span>{sorted[key]}</span>
+              </p>
+            ))
+          ) : (
+            <div></div>
+          )}
+        </div>
+        <h2>Chat Messages</h2>
         <div
           className="chat-messages"
           ref={(div) => {
